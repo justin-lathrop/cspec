@@ -9,10 +9,10 @@ cspec: cspec.o
 libcspec.so: cspec_list.o cspec_tree.o cspec.o
 	$(CC) -shared $^ -o $@
 
-clean:
-	$(RM) *.o *.so
-
 example: libcspec.so cspec_example.so
 
 cspec_example.so: cspec_example.o
 	$(CC) -shared $^ -o $@ -L. -lcspec
+
+clean:
+	$(RM) *.o *.so cspec
