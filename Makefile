@@ -4,7 +4,7 @@ CC := gcc
 all: libcspec.so cspec example
 
 cspec: cspec.o
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -ldl -L. -lcspec
 
 libcspec.so: cspec_list.o cspec_tree.o cspec.o
 	$(CC) -shared $^ -o $@

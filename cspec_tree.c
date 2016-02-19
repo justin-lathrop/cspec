@@ -2,13 +2,15 @@
 #include <string.h>
 #include "cspec_tree.h"
 
+#include <stdio.h>
+
 void free_base(cspec_node_t * base);
 
 void free_befores(cspec_list_t * befores){
 	int size = cspec_list_size(befores);
 	
 	for(int i = 0; i < size; i++){
-		cspec_node_code_block_t * before = (cspec_node_code_block_t *)(cspec_list_get(befores, i)->data);
+		cspec_node_code_block_t * before = (cspec_node_code_block_t *)cspec_list_get(befores, i);
 		free_base(before->base);
 		free(before->base);
 		free(before->code_block);
@@ -20,7 +22,7 @@ void free_afters(cspec_list_t * afters){
 	int size = cspec_list_size(afters);
 	
 	for(int i = 0; i < size; i++){
-		cspec_node_code_block_t * after = (cspec_node_code_block_t *)(cspec_list_get(afters, i)->data);
+		cspec_node_code_block_t * after = (cspec_node_code_block_t *)cspec_list_get(afters, i);
 		free_base(after->base);
 		free(after->base);
 		free(after->code_block);
@@ -32,7 +34,7 @@ void free_its(cspec_list_t * its){
 	int size = cspec_list_size(its);
 	
 	for(int i = 0; i < size; i++){
-		cspec_node_code_block_t * it = (cspec_node_code_block_t *)(cspec_list_get(its, i)->data);
+		cspec_node_code_block_t * it = (cspec_node_code_block_t *)cspec_list_get(its, i);
 		free_base(it->base);
 		free(it->base);
 		free(it->code_block);
@@ -44,7 +46,7 @@ void free_describes(cspec_list_t * describes){
 	int size = cspec_list_size(describes);
 	
 	for(int i = 0; i < size; i++){
-		cspec_node_describe_t * describe = (cspec_node_describe_t *)(cspec_list_get(describes, i)->data);
+		cspec_node_describe_t * describe = (cspec_node_describe_t *)cspec_list_get(describes, i);
 		free_base(describe->base);
 		free(describe->base);
 		free_its(describe->its);
@@ -101,7 +103,6 @@ cspec_node_t * initialize_node(cspec_node_type type, char * key){
 	return(node);
 }
 
-
 cspec_tree_t * cspec_tree_initialize(){
 	cspec_tree_t * tree = (cspec_tree_t *)malloc(sizeof(cspec_tree_t));
 	tree->describes = cspec_list_initialize();
@@ -112,6 +113,7 @@ cspec_tree_t * cspec_tree_initialize(){
 }
 
 void cspec_tree_add_describe(cspec_tree_t * tree, char * key){
+	printf("ADD DESCRIBE\n");
 	if(find_describe(tree->describes, key) != NULL){ return; }
 
 	cspec_node_describe_t * describe = (cspec_node_describe_t *)malloc(sizeof(cspec_node_describe_t));
@@ -122,6 +124,7 @@ void cspec_tree_add_describe(cspec_tree_t * tree, char * key){
 }
 
 void cspec_tree_add_it(cspec_tree_t * tree, char * describe_key, char * it_key, cspec_block code_block){
+	printf("ADD IT\n");
 	cspec_tree_add_describe(tree, describe_key);
 	cspec_node_describe_t * describe = find_describe(tree->describes, describe_key);
 
@@ -133,6 +136,7 @@ void cspec_tree_add_it(cspec_tree_t * tree, char * describe_key, char * it_key, 
 }
 
 void cspec_tree_add_before(cspec_tree_t * tree, char * describe_key, char * it_key, cspec_block code_block){
+	printf("ADD BEFORE\n");
 	cspec_node_code_block_t * before = (cspec_node_code_block_t *)malloc(sizeof(cspec_node_code_block_t));
 	before->base = initialize_node(BEFORE, NULL);
 	before->code_block = code_block;
@@ -158,15 +162,21 @@ void cspec_tree_add_before(cspec_tree_t * tree, char * describe_key, char * it_k
 }
 
 void cspec_tree_add_after(cspec_tree_t * tree, char * describe_key, char * it_key, cspec_block code_block){
+	printf("CSPEC_AFTER\n");
 	cspec_node_code_block_t * after = (cspec_node_code_block_t *)malloc(sizeof(cspec_node_code_block_t));
 	after->base = initialize_node(AFTER, NULL);
 	after->code_block = code_block;
 
 	if(describe_key == NULL){ // ROOT
+		printf("0\n");
 		cspec_list_add(tree->afters, (void *)after);
+		printf("1\n");
 	}else{
+		printf("2\n");
 		cspec_tree_add_describe(tree, describe_key);
+		printf("3\n");
 		cspec_node_describe_t * describe = find_describe(tree->describes, describe_key);
+		printf("4\n");
 
 		if(it_key == NULL){ // DESCRIBE
 			cspec_list_add(describe->base->afters, (void *)after);

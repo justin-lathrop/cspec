@@ -4,9 +4,11 @@
 #include "cspec_tree.h"
 
 /*
- * CSpec is a mimic of RSpec, but probably less convienvient.  It 
- * aims to give a way to perform behavior driven development 
- * testing in the c programming world.
+ * This is the main entry point into CSpec, these defines 
+ * are here to wrap the cspec_tree library for ease of 
+ * use.  This is expected to be built into a shared library 
+ * which then will be dynamically loaded by the cspec test 
+ * runner executable which will then go through the tests.
  */
 
 #define __append_helper(a, b) a##b

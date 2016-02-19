@@ -7,7 +7,6 @@ cspec_list_item_t * get_bottom(cspec_list_item_t * start){
 	return(next);
 }
 
-
 cspec_list_t * cspec_list_initialize(){
 	cspec_list_t * list = (cspec_list_t *)malloc(sizeof(cspec_list_t));
 	list->head = NULL;
@@ -15,9 +14,16 @@ cspec_list_t * cspec_list_initialize(){
 	return(list);
 }
 
-void cspec_list_add(cspec_list_t * list, cspec_list_item_t * item){
-	cspec_list_item_t * bottom = get_bottom(list->head);
-	bottom->next = item;
+void cspec_list_add(cspec_list_t * list, void * data){
+	cspec_list_item_t * item = cspec_list_item_initialize();
+	item->data = data;
+
+	if(list->head == NULL){
+		list->head = item;
+	}else{
+		cspec_list_item_t * bottom = get_bottom(list->head);
+		bottom->next = item;
+	}
 }
 
 void cspec_list_free(cspec_list_t * list){
@@ -52,14 +58,14 @@ int cspec_list_size(cspec_list_t * list){
 	return(size);
 }
 
-cspec_list_item_t * cspec_list_get(cspec_list_t * list, int index){
+void * cspec_list_get(cspec_list_t * list, int index){
 	cspec_list_item_t * next;
 	int current_index = 0;
 
 	next = list->head;
 	while(next){
 		if(current_index == index){
-			return(next);
+			return(next->data);
 		}else{
 			current_index++;
 			next = next->next;
