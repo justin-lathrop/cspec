@@ -63,8 +63,11 @@ cspec_list_t * find_cspec_symbols(const char * path){
 		// Remove newline
 		output[strcspn(output, "\r\n")] = 0;
 
-		if(strlen(output) > 14 && strncmp(output, "_CSPEC_handle_", 14) == 0){
-			char * symbol = (char *)malloc(sizeof(char) * strlen(output));
+		// If '_' is first character, remove it
+		if(output[0] == '_'){ memmove(output, output+1, strlen(output)); }
+
+		if(regex_test("^CSPEC_handle_.*", output)){
+			char * symbol = (char *)malloc(sizeof(char) * strlen(output)+1);
 			strcpy(symbol, output);
 
 			cspec_list_add(symbols, (void *)symbol);
@@ -86,7 +89,7 @@ void process_cspec(const char * path){
 	if(symbols != NULL && cspec_list_size(symbols) > 0){
 		cspec_tree_t * cspec_tree = cspec_tree_initialize();
 		int size = cspec_list_size(symbols);
-		void * handle = dlopen(path, RTLD_NOW|RTLD_GLOBAL);
+		void * handle = dlopen(path, RTLD_LAZY);
 
 		if(!handle){
             printf("%s\n", dlerror());
@@ -103,14 +106,13 @@ void process_cspec(const char * path){
 	            return;
 	        }
 			
-			printf("BEFORE\n");
 			func(cspec_tree);
-			printf("AFTER\n");
 		}
 
-		// TODO: Now run through the tree...
+        cspec_tree_iterate(cspec_tree);
 
 		dlclose(handle);
+		cspec_tree_free(cspec_tree);
 	}
 }
 
@@ -159,6 +161,20 @@ int main(int argc, char ** argv){
 	if (nftw(prefix, process_possible_cspec, 20, 0) == -1) {
         perror("nftw");
     }
-
+    
+    /*cspec_tree_t * tree = cspec_tree_initialize();
+    cspec_tree_add_before(tree, "", "", NULL);
+    cspec_tree_add_after(tree, "", "", NULL);
+    
+    cspec_tree_add_describe(tree, "TEST DESCRIBE");
+    cspec_tree_add_before(tree, "TEST DESCRIBE", "", NULL);
+    cspec_tree_add_after(tree, "TEST DESCRIBE", "", NULL);
+    
+    cspec_tree_add_it(tree, "TEST DESCRIBE", "TEST 1", NULL);
+    cspec_tree_add_before(tree, "TEST DESCRIBE", "TEST 1", NULL);
+    cspec_tree_add_after(tree, "TEST DESCRIBE", "TEST 1", NULL);
+    
+    cspec_tree_iterate(tree);*/
+    
 	return(0);
 }

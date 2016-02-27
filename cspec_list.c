@@ -32,8 +32,6 @@ void cspec_list_free(cspec_list_t * list){
 	while(next->next){
 		if(!next->next->next){
 			cspec_list_item_free(next->next);
-			free(next->next);
-
 			next = list->head;
 		}else{
 			next = next->next;
@@ -41,7 +39,6 @@ void cspec_list_free(cspec_list_t * list){
 	}
 
 	cspec_list_item_free(list->head);
-	free(list->head);
 	free(list);
 }
 
@@ -85,6 +82,4 @@ cspec_list_item_t * cspec_list_item_initialize(){
 
 void cspec_list_item_free(cspec_list_item_t * item){
 	free(item->next);
-	free(item->data);
-	free(item);
 }

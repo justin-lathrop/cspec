@@ -85,5 +85,6 @@ void cspec_tree_add_before(cspec_tree_t *, char *, char *, cspec_block);
 void cspec_tree_add_it(cspec_tree_t *, char *, char *, cspec_block);
 void cspec_tree_add_after(cspec_tree_t *, char *, char *, cspec_block);
 void cspec_tree_free(cspec_tree_t *);
+void cspec_tree_iterate(cspec_tree_t *);
 
 #endif
