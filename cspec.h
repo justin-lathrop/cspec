@@ -2,6 +2,7 @@
 #define __CSPEC__
 
 #include "cspec_tree.h"
+#include "cspec_list.h"
 
 /*
  * This is the main entry point into CSpec, these defines 
@@ -29,7 +30,7 @@ void __append(CSPEC_handle_before_, __LINE__)(cspec_tree_t * cspec_tree){\
 }
 
 #define it(describe_key, name, block)\
-void __append(CSPEC_it_, __LINE__)(){\
+void __append(CSPEC_it_, __LINE__)(cspec_list_t * failures){\
 	block\
 }\
 void __append(CSPEC_handle_it_, __LINE__)(cspec_tree_t * cspec_tree){\
@@ -42,6 +43,12 @@ void __append(CSPEC_after_, __LINE__()){\
 }\
 void __append(CSPEC_handle_after_, __LINE__)(cspec_tree_t * cspec_tree){\
 	cspec_tree_add_after(cspec_tree, __stringize(describe_key), __stringize(it_key), __append(CSPEC_after_, __LINE__));\
+}
+
+#define expect(boolean_expression)\
+if(boolean_expression){\
+}else{\
+    cspec_list_add(failures, (void *) __stringize(boolean_expression));\
 }
 
 #endif

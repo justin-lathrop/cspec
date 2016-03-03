@@ -54,6 +54,7 @@ typedef struct cspec_tree_t{
 } cspec_tree_t;
 
 typedef void (* cspec_block)();
+typedef void (* cspec_block_it)(cspec_list_t *);
 
 typedef enum{
 	DESCRIBE,
@@ -77,12 +78,13 @@ typedef struct cspec_node_describe_t{
 typedef struct cspec_node_code_block_t{
 	cspec_node_t * base;
 	cspec_block code_block;
+    cspec_block_it code_block_it;
 } cspec_node_code_block_t;
 
 cspec_tree_t * cspec_tree_initialize();
 void cspec_tree_add_describe(cspec_tree_t *, char *);
 void cspec_tree_add_before(cspec_tree_t *, char *, char *, cspec_block);
-void cspec_tree_add_it(cspec_tree_t *, char *, char *, cspec_block);
+void cspec_tree_add_it(cspec_tree_t *, char *, char *, cspec_block_it);
 void cspec_tree_add_after(cspec_tree_t *, char *, char *, cspec_block);
 void cspec_tree_free(cspec_tree_t *);
 void cspec_tree_iterate(cspec_tree_t *);

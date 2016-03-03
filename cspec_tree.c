@@ -106,17 +106,17 @@ void cspec_tree_add_describe(cspec_tree_t * tree, char * key){
 	cspec_list_add(tree->describes, (void *)describe);
 }
 
-void cspec_tree_add_it(cspec_tree_t * tree, char * describe_key, char * it_key, cspec_block code_block){
+void cspec_tree_add_it(cspec_tree_t * tree, char * describe_key, char * it_key, cspec_block_it code_block){
 	cspec_node_describe_t * describe = find_node(tree->describes, describe_key);
     if(describe == NULL){ cspec_tree_add_describe(tree, describe_key); }
 
     cspec_node_code_block_t * it = find_node(describe->its, it_key);
     if(it != NULL){
-        it->code_block = code_block;
+        it->code_block_it = code_block;
     }else{
         cspec_node_code_block_t * it = (cspec_node_code_block_t *)malloc(sizeof(cspec_node_code_block_t));
         it->base = initialize_node(IT, it_key);
-        it->code_block = code_block;
+        it->code_block_it = code_block;
         
         cspec_list_add(describe->its, (void *)it);
     }
@@ -190,7 +190,6 @@ void cspec_tree_iterate(cspec_tree_t * tree){
     before_size = cspec_list_size(tree->befores);
     for(i = 0; i < before_size; i++){
         cspec_node_code_block_t * before = (cspec_node_code_block_t *)cspec_list_get(tree->befores, i);
-        //printf("BEFORE\n");
         before->code_block();
         
     }
@@ -204,7 +203,6 @@ void cspec_tree_iterate(cspec_tree_t * tree){
         before_size = cspec_list_size(describe->base->befores);
         for(j = 0; j < before_size; j++){
             cspec_node_code_block_t * before = (cspec_node_code_block_t *)cspec_list_get(describe->base->befores, j);
-            //printf("BEFORE\n");
             before->code_block();
         }
         
@@ -219,18 +217,26 @@ void cspec_tree_iterate(cspec_tree_t * tree){
             before_size = cspec_list_size(it->base->befores);
             for(k = 0; k < before_size; k++){
                 cspec_node_code_block_t * before = (cspec_node_code_block_t *)cspec_list_get(it->base->befores, k);
-                //printf("\tBEFORE\n");
                 before->code_block();
             }
             
+            cspec_list_t * failures = cspec_list_initialize();
+            it->code_block_it(failures);
             printf("\tIT[ %s ]\n", it->base->key);
-            it->code_block();
             
+            int failures_size = cspec_list_size(failures);
+            if(failures_size > 0){
+                for(int l = 0; l < failures_size; l++){
+                    printf("\t\tFAIL[ %s ]\n", (char *)cspec_list_get(failures, l));
+                }
+                
+                cspec_list_free(failures);
+            }
+                
             // Afters
             after_size = cspec_list_size(it->base->afters);
             for(k = 0; k < after_size; k++){
                 cspec_node_code_block_t * after = (cspec_node_code_block_t *)cspec_list_get(it->base->afters, k);
-                //printf("\tAFTER\n");
                 after->code_block();
             }
         }
@@ -239,7 +245,6 @@ void cspec_tree_iterate(cspec_tree_t * tree){
         after_size = cspec_list_size(describe->base->afters);
         for(j = 0; j < after_size; j++){
             cspec_node_code_block_t * after = (cspec_node_code_block_t *)cspec_list_get(describe->base->afters, j);
-            //printf("AFTER\n");
             after->code_block();
         }
     }
@@ -248,7 +253,6 @@ void cspec_tree_iterate(cspec_tree_t * tree){
     after_size = cspec_list_size(tree->afters);
     for(i = 0; i < after_size; i++){
         cspec_node_code_block_t * after = (cspec_node_code_block_t *)cspec_list_get(tree->afters, i);
-        //printf("AFTER\n");
         after->code_block();
     }
 }
