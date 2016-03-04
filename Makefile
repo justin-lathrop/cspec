@@ -1,4 +1,4 @@
-CFLAGS := -fPIC -O3 -g -Wall -Werror
+CFLAGS := -fPIC -O3 -Wall -Werror
 CC := gcc
 
 all: libcspec.so cspec example
