@@ -179,12 +179,14 @@ void cspec_tree_free(cspec_tree_t * tree){
 	free(tree);
 }
 
-void cspec_tree_iterate(cspec_tree_t * tree){
+int cspec_tree_iterate(cspec_tree_t * tree){
     int describe_size,
         it_size,
         before_size,
         after_size,
         i, j, k = 0;
+    
+    int num_failed = 0;
     
     // Befores
     before_size = cspec_list_size(tree->befores);
@@ -222,17 +224,28 @@ void cspec_tree_iterate(cspec_tree_t * tree){
             
             cspec_list_t * failures = cspec_list_initialize();
             it->code_block_it(failures);
-            printf("\tIT[ %s ]\n", it->base->key);
-            
             int failures_size = cspec_list_size(failures);
-            if(failures_size > 0){
-                for(int l = 0; l < failures_size; l++){
-                    printf("\t\tFAIL[ %s ]\n", (char *)cspec_list_get(failures, l));
+            int pending = 0;
+            
+            for(int l = 0; l < failures_size; l++){
+                if(strncmp("PENDING", (char *)cspec_list_get(failures, l), 7) == 0){
+                    pending = 1;
                 }
-                
-                cspec_list_free(failures);
             }
-                
+            
+            if(pending == 1){
+                printf("\tPENDING[ %s ]\n", it->base->key);
+            }else{
+                if(failures_size > 0){
+                    for(int l = 0; l < failures_size; l++){
+                        num_failed++;
+                        printf("\tFAIL[ %s ] [ %s ]\n", it->base->key, (char *)cspec_list_get(failures, l));
+                    }
+                }else{
+                    printf("\tIT[ %s ]\n", it->base->key);
+                }
+            }
+            
             // Afters
             after_size = cspec_list_size(it->base->afters);
             for(k = 0; k < after_size; k++){
@@ -255,4 +268,6 @@ void cspec_tree_iterate(cspec_tree_t * tree){
         cspec_node_code_block_t * after = (cspec_node_code_block_t *)cspec_list_get(tree->afters, i);
         after->code_block();
     }
+    
+    return(num_failed);
 }

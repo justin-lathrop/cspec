@@ -14,7 +14,8 @@
 
 #define __append_helper(a, b) a##b
 #define __append(a, b) __append_helper(a, b)
-#define __stringize(a) #a
+#define __stringize_helper(a) #a
+#define __stringize(a) __stringize_helper(a)
 
 #define describe(name)\
 void __append(CSPEC_handle_describe_, name)(cspec_tree_t * cspec_tree){\
@@ -45,6 +46,12 @@ void __append(CSPEC_handle_after_, __LINE__)(cspec_tree_t * cspec_tree){\
 	cspec_tree_add_after(cspec_tree, __stringize(describe_key), __stringize(it_key), __append(CSPEC_after_, __LINE__));\
 }
 
+// Can only be run within an IT block.
+#define pending(message)\
+cspec_list_add(failures, (void *)"PENDING "message);\
+return;
+
+// Can only be run within an IT block.
 #define expect(boolean_expression)\
 if(boolean_expression){\
 }else{\

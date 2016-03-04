@@ -20,7 +20,8 @@
  * within them.
  */
 
-// Needs to be global because of nftw callback
+// Needs to be global...
+int num_failed_tests;
 char * prefix;
 typedef void (* cspec_func)(cspec_tree_t *);
 
@@ -109,7 +110,7 @@ void process_cspec(const char * path){
 			func(cspec_tree);
 		}
 
-        cspec_tree_iterate(cspec_tree);
+        num_failed_tests += cspec_tree_iterate(cspec_tree);
 
 		dlclose(handle);
 		cspec_tree_free(cspec_tree);
@@ -146,6 +147,7 @@ int process_possible_cspec(const char *fpath, const struct stat *sb, int tflag, 
 int main(int argc, char ** argv){
 	int c = -1;
 	prefix = ".";
+    num_failed_tests = 0;
 
 	while((c = getopt(argc, argv, "hp:")) != -1){
 		switch(c){
@@ -176,5 +178,5 @@ int main(int argc, char ** argv){
     
     cspec_tree_iterate(tree);*/
     
-	return(0);
+	return(num_failed_tests);
 }
