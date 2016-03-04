@@ -7,9 +7,10 @@
 void free_base(cspec_node_t * base);
 
 void free_befores(cspec_list_t * befores){
+    int i;
 	int size = cspec_list_size(befores);
 	
-	for(int i = 0; i < size; i++){
+	for(i = 0; i < size; i++){
 		cspec_node_code_block_t * before = (cspec_node_code_block_t *)cspec_list_get(befores, i);
 		free_base(before->base);
 		free(before->base);
@@ -18,9 +19,10 @@ void free_befores(cspec_list_t * befores){
 }
 
 void free_afters(cspec_list_t * afters){
+    int i;
 	int size = cspec_list_size(afters);
 	
-	for(int i = 0; i < size; i++){
+	for(i = 0; i < size; i++){
 		cspec_node_code_block_t * after = (cspec_node_code_block_t *)cspec_list_get(afters, i);
 		free_base(after->base);
 		free(after->base);
@@ -29,9 +31,10 @@ void free_afters(cspec_list_t * afters){
 }
 
 void free_its(cspec_list_t * its){
+    int i;
 	int size = cspec_list_size(its);
 	
-	for(int i = 0; i < size; i++){
+	for(i = 0; i < size; i++){
 		cspec_node_code_block_t * it = (cspec_node_code_block_t *)cspec_list_get(its, i);
 		free_base(it->base);
 		free(it->base);
@@ -40,9 +43,10 @@ void free_its(cspec_list_t * its){
 }
 
 void free_describes(cspec_list_t * describes){
+    int i;
 	int size = cspec_list_size(describes);
 	
-	for(int i = 0; i < size; i++){
+	for(i = 0; i < size; i++){
 		cspec_node_describe_t * describe = (cspec_node_describe_t *)cspec_list_get(describes, i);
 		free_base(describe->base);
 		free(describe->base);
@@ -63,10 +67,11 @@ void free_base(cspec_node_t * base){
 }
 
 void * find_node(cspec_list_t * list, char * key){
+    int i;
 	int size = cspec_list_size(list);
     cspec_node_describe_t * node;
 
-	for(int i = 0; i < size; i++){
+	for(i = 0; i < size; i++){
 		node = (cspec_node_describe_t *)cspec_list_get(list, i);
 
 		if(strcmp(node->base->key, key) == 0){
@@ -225,9 +230,9 @@ int cspec_tree_iterate(cspec_tree_t * tree){
             cspec_list_t * failures = cspec_list_initialize();
             it->code_block_it(failures);
             int failures_size = cspec_list_size(failures);
-            int pending = 0;
+            int l, pending = 0;
             
-            for(int l = 0; l < failures_size; l++){
+            for(l = 0; l < failures_size; l++){
                 if(strncmp("PENDING", (char *)cspec_list_get(failures, l), 7) == 0){
                     pending = 1;
                 }
@@ -237,7 +242,7 @@ int cspec_tree_iterate(cspec_tree_t * tree){
                 printf("\tPENDING[ %s ]\n", it->base->key);
             }else{
                 if(failures_size > 0){
-                    for(int l = 0; l < failures_size; l++){
+                    for(l = 0; l < failures_size; l++){
                         num_failed++;
                         printf("\tFAIL[ %s ] [ %s ]\n", it->base->key, (char *)cspec_list_get(failures, l));
                     }

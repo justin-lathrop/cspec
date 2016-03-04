@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 500
 #include <stdio.h>
 #include <unistd.h>
 #include <ftw.h>
@@ -29,20 +30,23 @@ typedef void (* cspec_func)(cspec_tree_t *);
  * Prints the usage of 'cspec'.
  */
 void usage(char * location){
-	printf("Usage: %s", location);
+	printf("Usage: %s [options]\n", location);
+    printf("\nOptions:\n");
+    printf("\t-p\tPrefix to recursively search for cspec tests.\n");
+    printf("\t-h\tThis usage.\n");
 }
 
 /*
  * Runs a simple regex check/test on any string given, 
  * along with the given pattern the compile.
  */
-bool regex_test(char * regex_pattern, const char * compare){
+int regex_test(char * regex_pattern, const char * compare){
 	regex_t regex;
 	regcomp(&regex, regex_pattern, 0);
 	int regcheck = regexec(&regex, compare, 0, NULL, 0);
 	regfree(&regex);
 
-	return(regcheck == 0);
+	return((regcheck == 0)?0:1);
 }
 
 /*
@@ -56,8 +60,9 @@ cspec_list_t * find_cspec_symbols(const char * path){
 	char command[1035];
 	cspec_list_t * symbols = cspec_list_initialize();
 
-	strcpy(command, "nm -j ");
+	strcpy(command, "nm ");
 	strcat(command, path);
+    strcat(command, " | awk '{ print $3 }'");
 	fp = popen(command, "r");
 
 	while(fgets(output, sizeof(output)-1, fp) != NULL){
@@ -67,7 +72,7 @@ cspec_list_t * find_cspec_symbols(const char * path){
 		// If '_' is first character, remove it
 		if(output[0] == '_'){ memmove(output, output+1, strlen(output)); }
 
-		if(regex_test("^CSPEC_handle_.*", output)){
+		if(regex_test("^CSPEC_handle_.*", output) == 0){
 			char * symbol = (char *)malloc(sizeof(char) * strlen(output)+1);
 			strcpy(symbol, output);
 
@@ -86,6 +91,7 @@ cspec_list_t * find_cspec_symbols(const char * path){
  */
 void process_cspec(const char * path){
 	cspec_list_t * symbols = find_cspec_symbols(path);
+    int i;
 
 	if(symbols != NULL && cspec_list_size(symbols) > 0){
 		cspec_tree_t * cspec_tree = cspec_tree_initialize();
@@ -97,7 +103,7 @@ void process_cspec(const char * path){
             return;
         }
 
-		for(int i = 0; i < size; i++){
+		for(i = 0; i < size; i++){
 			char * symbol = (char *)cspec_list_get(symbols, i);
 			cspec_func func = (cspec_func)dlsym(handle, symbol);
 
@@ -126,10 +132,10 @@ void process_cspec(const char * path){
  */
 int process_possible_cspec(const char *fpath, const struct stat *sb, int tflag, struct FTW *ftwbuf){
 	// Make sure file/directory isn't hidden
-	if(regex_test("/\\..*", &fpath[strlen(prefix)])){ return(0); }
+	if(regex_test("/\\..*", &fpath[strlen(prefix)]) == 0){ return(0); }
 
 	// Make sure its a .so file
-	if(!regex_test("\\.so$", fpath)){ return(0); }
+	if(regex_test("\\.so$", fpath) == 1){ return(0); }
 
 	// Make sure its a file and not a directory
 	if(tflag == FTW_D){ return(0); }
@@ -149,11 +155,11 @@ int main(int argc, char ** argv){
 	prefix = ".";
     num_failed_tests = 0;
 
-	while((c = getopt(argc, argv, "hp:")) != -1){
+	while((c = getopt(argc, argv, "hp:m:")) != -1){
 		switch(c){
 		case 'h':
 			usage(argv[0]);
-			break;
+            return(0);
 		case 'p':
 			prefix = optarg;
 			break;
@@ -163,20 +169,7 @@ int main(int argc, char ** argv){
 	if (nftw(prefix, process_possible_cspec, 20, 0) == -1) {
         perror("nftw");
     }
-    
-    /*cspec_tree_t * tree = cspec_tree_initialize();
-    cspec_tree_add_before(tree, "", "", NULL);
-    cspec_tree_add_after(tree, "", "", NULL);
-    
-    cspec_tree_add_describe(tree, "TEST DESCRIBE");
-    cspec_tree_add_before(tree, "TEST DESCRIBE", "", NULL);
-    cspec_tree_add_after(tree, "TEST DESCRIBE", "", NULL);
-    
-    cspec_tree_add_it(tree, "TEST DESCRIBE", "TEST 1", NULL);
-    cspec_tree_add_before(tree, "TEST DESCRIBE", "TEST 1", NULL);
-    cspec_tree_add_after(tree, "TEST DESCRIBE", "TEST 1", NULL);
-    
-    cspec_tree_iterate(tree);*/
-    
+
 	return(num_failed_tests);
 }
+

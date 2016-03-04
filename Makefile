@@ -16,3 +16,4 @@ cspec_example.so: cspec_example.o
 
 clean:
 	$(RM) *.o *.so cspec
+
