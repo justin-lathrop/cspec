@@ -2,7 +2,7 @@
 Behavior driven test framework written for C.  In order to use this testing framework you must include the 'cspec.h' header file and compile linking with the libcspec.so library.  The shared object can then be loaded by the 'cspec' executable and run the tests within it.
 
 Cspec currently handles the following functionality:
-* decribe
+* describe
 * before
 * after
 * it
