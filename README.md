@@ -10,7 +10,7 @@ Cspec currently handles the following functionality:
 
 Example test file (cspec_example.c):
 ``` c
-#include "cspec.h"
+#include <cspec.h>
 
 describe(Calculator)
 
