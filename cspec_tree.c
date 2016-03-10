@@ -113,7 +113,10 @@ void cspec_tree_add_describe(cspec_tree_t * tree, char * key){
 
 void cspec_tree_add_it(cspec_tree_t * tree, char * describe_key, char * it_key, cspec_block_it code_block){
 	cspec_node_describe_t * describe = find_node(tree->describes, describe_key);
-    if(describe == NULL){ cspec_tree_add_describe(tree, describe_key); }
+    if(describe == NULL){
+        cspec_tree_add_describe(tree, describe_key);
+        describe = find_node(tree->describes, describe_key);
+    }
 
     cspec_node_code_block_t * it = find_node(describe->its, it_key);
     if(it != NULL){
